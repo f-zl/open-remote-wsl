@@ -36,7 +36,7 @@ export class ServerInstallError extends Error {
 
 const DEFAULT_DOWNLOAD_URL_TEMPLATE = 'https://github.com/VSCodium/vscodium/releases/download/${version}.${release}/vscodium-reh-${os}-${arch}-${version}.${release}.tar.gz';
 
-export async function installCodeServer(wslManager: WSLManager, distroName: string, serverDownloadUrlTemplate: string | undefined, extensionIds: string[], envVariables: string[], logger: Log): Promise<ServerInstallResult> {
+export async function installCodeServer(wslManager: WSLManager, distroName: string, serverDownloadUrlTemplate: string | undefined, extensionIds: string[], envVariables: string[], logger: Log, user?: string): Promise<ServerInstallResult> {
     const scriptId = crypto.randomBytes(12).toString('hex');
 
     const vscodeServerConfig = await getVSCodeServerConfig();
@@ -57,7 +57,7 @@ export async function installCodeServer(wslManager: WSLManager, distroName: stri
 
     // Fish shell does not support heredoc so let's workaround it using -c option,
     // also replace single quotes (') within the script with ('\'') as there's no quoting within single quotes, see https://unix.stackexchange.com/a/24676
-    const resp = await wslManager.exec('bash', ['-c', `'${installServerScript.replace(/'/g, `'\\''`)}'`], distroName);
+    const resp = await wslManager.exec('bash', ['-c', `'${installServerScript.replace(/'/g, `'\\''`)}'`], distroName, user);
 
     const endScriptRegex = new RegExp(`${scriptId}: Server installation script done`, 'm');
     const commandOutput = await Promise.race([

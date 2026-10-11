@@ -33,6 +33,7 @@
 		"onCommand:openremotewsl.connectInNewWindow",
 		"onCommand:openremotewsl.connectUsingDistro",
 		"onCommand:openremotewsl.connectUsingDistroInNewWindow",
+		"onCommand:openremotewsl.connectUsingDistroAndFolder",
 		"onCommand:openremotewsl.showLog",
 		"onResolveRemoteAuthority:wsl",
 		"onView:wslTargets"
@@ -79,6 +80,11 @@
 			{
 				"command": "openremotewsl.connectUsingDistroInNewWindow",
 				"title": "Connect to WSL using Distro in New Window...",
+				"category": "Remote-WSL"
+			},
+			{
+				"command": "openremotewsl.connectUsingDistroAndFolder",
+				"title": "Connect to WSL with Folder and User",
 				"category": "Remote-WSL"
 			},
 			{
@@ -176,6 +182,10 @@
 					"when": "(isWindows && !isWeb)"
 				},
 				{
+					"command": "openremotewsl.connectUsingDistroAndFolder",
+					"when": "(isWindows && !isWeb)"
+				},
+				{
 					"command": "openremotewsl.explorer.refresh",
 					"when": "false"
 				},
@@ -239,6 +249,11 @@
 					"command": "openremotewsl.explorer.emptyWindowInCurrentWindow",
 					"when": "viewItem =~ /^openremotewsl.explorer.distro$/",
 					"group": "navigation@1"
+				},
+				{
+					"command": "openremotewsl.connectUsingDistroAndFolder",
+					"when": "viewItem =~ /^openremotewsl.explorer.distro$/",
+					"group": "navigation@3"
 				},
 				{
 					"command": "openremotewsl.explorer.setDefaultDistro",

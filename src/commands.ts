@@ -65,8 +65,38 @@ export function openRemoteWSLWindow(distro: string, reuseWindow: boolean) {
     vscode.commands.executeCommand('vscode.newWindow', { remoteAuthority: getRemoteAuthority(distro), reuseWindow });
 }
 
-export function openRemoteWSLLocationWindow(distro: string, path: string, reuseWindow: boolean) {
-    vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.from({ scheme: 'vscode-remote', authority: getRemoteAuthority(distro), path }), { forceNewWindow: !reuseWindow });
+export function openRemoteWSLLocationWindow(distro: string, path: string, reuseWindow: boolean, user?: string) {
+    vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.from({ scheme: 'vscode-remote', authority: getRemoteAuthority(distro, user), path }), { forceNewWindow: !reuseWindow });
+}
+
+export async function promptOpenDistroFolder(wslManager: WSLManager, reuseWindow: boolean, distroName?: string) {
+    if (!distroName) {
+        distroName = (await showDistrosPicker(wslManager, 'Select WSL distro'))?.name;
+    }
+
+    if (!distroName) {
+        return;
+    }
+
+    const user = await vscode.window.showInputBox({
+        prompt: `Username to use in the "${distroName}" distro (leave empty to use the default user)`,
+        placeHolder: 'default user',
+        validateInput: value => /[\s+]/.test(value) ? 'Username cannot contain whitespace or "+"' : undefined
+    });
+    if (user === undefined) {
+        return;
+    }
+
+    const path = await vscode.window.showInputBox({
+        prompt: `Folder or workspace file to open in the "${distroName}" distro`,
+        placeHolder: '/home/user/project',
+        validateInput: value => value.trim().length === 0 ? 'Path cannot be empty' : undefined
+    });
+    if (path === undefined) {
+        return;
+    }
+
+    openRemoteWSLLocationWindow(distroName, path, reuseWindow, user || undefined);
 }
 
 export async function setDefaultWSLDistro(wslManager: WSLManager, distroName: string) {

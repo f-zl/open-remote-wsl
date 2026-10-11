@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { REMOTE_WSL_AUTHORITY } from './authResolver';
+import { REMOTE_WSL_AUTHORITY, parseRemoteAuthority } from './authResolver';
 
 export class RemoteLocationHistory {
     private static STORAGE_KEY = 'remoteLocationHistory_v0';
@@ -37,14 +37,12 @@ export class RemoteLocationHistory {
 export function getRemoteWorkspaceLocationData(): [string, string] | undefined {
     let location = vscode.workspace.workspaceFile;
     if (location && location.scheme === 'vscode-remote' && location.authority.startsWith(REMOTE_WSL_AUTHORITY) && location.path.endsWith('.code-workspace')) {
-        const [, distroName] = location.authority.split('+');
-        return [distroName, location.path];
+        return [parseRemoteAuthority(location.authority).distroName, location.path];
     }
 
     location = vscode.workspace.workspaceFolders?.[0].uri;
     if (location && location.scheme === 'vscode-remote' && location.authority.startsWith(REMOTE_WSL_AUTHORITY)) {
-        const [, distroName] = location.authority.split('+');
-        return [distroName, location.path];
+        return [parseRemoteAuthority(location.authority).distroName, location.path];
     }
 
     return undefined;

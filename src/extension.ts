@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import Log from './common/logger';
 import { RemoteWSLResolver, REMOTE_WSL_AUTHORITY } from './authResolver';
-import { promptOpenRemoteWSLWindow } from './commands';
+import { promptOpenRemoteWSLWindow, promptOpenDistroFolder } from './commands';
 import { DistroTreeDataProvider } from './distroTreeView';
 import { getRemoteWorkspaceLocationData, RemoteLocationHistory } from './remoteLocationHistory';
 import { WSLManager } from './wsl/wslManager';
@@ -34,6 +34,7 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand('openremotewsl.connectInNewWindow', () => promptOpenRemoteWSLWindow(wslManager, true, false)));
     context.subscriptions.push(vscode.commands.registerCommand('openremotewsl.connectUsingDistro', () => promptOpenRemoteWSLWindow(wslManager, false, true)));
     context.subscriptions.push(vscode.commands.registerCommand('openremotewsl.connectUsingDistroInNewWindow', () => promptOpenRemoteWSLWindow(wslManager, false, false)));
+    context.subscriptions.push(vscode.commands.registerCommand('openremotewsl.connectUsingDistroAndFolder', (e?: { name: string }) => promptOpenDistroFolder(wslManager, false, e?.name)));
     context.subscriptions.push(vscode.commands.registerCommand('openremotewsl.showLog', () => logger.show()));
 }
 

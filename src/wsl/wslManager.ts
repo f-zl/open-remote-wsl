@@ -94,8 +94,9 @@ export class WSLManager {
         }
     }
 
-    async exec(cmd: string, args: string[], distro: string) {
-        return this._runWSLCommand(['--distribution', distro, '--', cmd, ...args], 'utf8');
+    async exec(cmd: string, args: string[], distro: string, user?: string) {
+        const userArgs = user ? ['--user', user] : [];
+        return this._runWSLCommand(['--distribution', distro, ...userArgs, '--', cmd, ...args], 'utf8');
     }
 
     private _runWSLCommand(args: string[], encoding: 'utf8' | 'utf16le') {

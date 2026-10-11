@@ -5,8 +5,16 @@ import { WSLManager } from './wsl/wslManager';
 
 export const REMOTE_WSL_AUTHORITY = 'wsl';
 
-export function getRemoteAuthority(distro: string) {
-    return `${REMOTE_WSL_AUTHORITY}+${distro}`;
+export function getRemoteAuthority(distro: string, user?: string) {
+    return user ? `${REMOTE_WSL_AUTHORITY}+${distro}+${user}` : `${REMOTE_WSL_AUTHORITY}+${distro}`;
+}
+
+export function parseRemoteAuthority(authority: string): { distroName: string; user?: string } {
+    const [type, distroName, user] = authority.split('+');
+    if (type !== REMOTE_WSL_AUTHORITY) {
+        throw new Error(`Invalid authority type for WSL resolver: ${type}`);
+    }
+    return { distroName, user };
 }
 
 class Tunnel implements vscode.Tunnel {
@@ -40,10 +48,7 @@ export class RemoteWSLResolver implements vscode.RemoteAuthorityResolver, vscode
     }
 
     resolve(authority: string, context: vscode.RemoteAuthorityResolverContext): Thenable<vscode.ResolverResult> {
-        const [type, distroName] = authority.split('+');
-        if (type !== REMOTE_WSL_AUTHORITY) {
-            throw new Error(`Invalid authority type for WSL resolver: ${type}`);
-        }
+        const { distroName, user } = parseRemoteAuthority(authority);
 
         this.logger.info(`Resolving wsl remote authority '${authority}' (attemp #${context.resolveAttempt})`);
 
@@ -58,7 +63,7 @@ export class RemoteWSLResolver implements vscode.RemoteAuthorityResolver, vscode
             cancellable: false
         }, async () => {
             try {
-                const installResult = await installCodeServer(this.wslManager, distroName, serverDownloadUrlTemplate, [], [], this.logger);
+                const installResult = await installCodeServer(this.wslManager, distroName, serverDownloadUrlTemplate, [], [], this.logger, user);
 
                 this.labelFormatterDisposable?.dispose();
                 this.labelFormatterDisposable = vscode.workspace.registerResourceLabelFormatter({
@@ -68,8 +73,8 @@ export class RemoteWSLResolver implements vscode.RemoteAuthorityResolver, vscode
                         label: '${path}',
                         separator: '/',
                         tildify: true,
-                        workspaceSuffix: `WSL: ${distroName}`,
-                        workspaceTooltip: `Running in ${distroName}`
+                        workspaceSuffix: user ? `WSL: ${distroName} (${user})` : `WSL: ${distroName}`,
+                        workspaceTooltip: user ? `Running in ${distroName} as ${user}` : `Running in ${distroName}`
                     }
                 });
 
